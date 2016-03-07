@@ -71,12 +71,15 @@ public class CameraPlus extends CordovaPlugin {
     }
 
 
-    private PluginResult startCamera(JSONArray inputs, CallbackContext callbackContext) {
+    private PluginResult startCamera(JSONArray inputs, CallbackContext callbackContext) throws JSONException{
         Log.w(LOGTAG, "startCamera");
+
+        //get the desired camera
+        int cameraId = inputs.getInt(0);
 
          // initialize the camera manager :)
          CameraManager.init(cordova.getActivity().getApplicationContext());
-         startCapture();
+         startCapture(cameraId);
 
          return null;
     }
@@ -127,7 +130,7 @@ public class CameraPlus extends CordovaPlugin {
         return null;
     }
 
-    private boolean startCapture(){
+    private boolean startCapture(int cameraId){
         Log.w(LOGTAG, "startCapture");
 
         if (false){
@@ -137,7 +140,7 @@ public class CameraPlus extends CordovaPlugin {
         }
 
         try {
-			CameraManager.get().openDriver();
+			CameraManager.get().openDriver(cameraId);
 		} catch (IOException e) {
 			Log.w(LOGTAG, "Exception in openDriver");
 		}

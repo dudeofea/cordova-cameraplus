@@ -4,8 +4,8 @@ var argscheck = require('cordova/argscheck'),
 
 var cameraplus_exports = {};
 
-cameraplus_exports.startCamera = function(success, error) {
-	exec(success, error, "CameraPlus", "startCamera", []);
+cameraplus_exports.startCamera = function(cameraId, success, error) {
+	exec(success, error, "CameraPlus", "startCamera", [cameraId]);
 };
 
 cameraplus_exports.stopCamera = function(success, error) {
@@ -40,4 +40,3 @@ cameraplus_exports.onCapture = function(success, error) {
 };
 
 module.exports = cameraplus_exports;
-
