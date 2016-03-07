@@ -183,13 +183,7 @@ public final class CameraManager {
 	         case Surface.ROTATION_270: degrees = 270; break;
 	     }
 
-	     int result;
-	     if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-	         result = (info.orientation + degrees) % 360;
-	         result = (360 - result) % 360;  // compensate the mirror
-	     } else {  // back-facing
-	         result = (info.orientation - degrees + 360) % 360;
-	     }
+	     int result = (info.orientation - degrees + 360) % 360;
 
 	     Log.d(TAG, "Image must be rotated to: " + result);
 
