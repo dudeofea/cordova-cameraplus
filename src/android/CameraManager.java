@@ -49,22 +49,6 @@ public final class CameraManager {
 		mDesiredHeight = height;
 	}
 
-	public Point getMaxResolution() {
-
-		if (camera != null)
-			return CameraConfigurationManager.getMaxResolution(camera.getParameters());
-		else
-			return null;
-	}
-
-	public Point getNormalResolution(Point normalRes) {
-
-		if (camera != null)
-			return CameraConfigurationManager.getCameraResolution(camera.getParameters(), normalRes);
-		else
-			return null;
-	}
-
 	public final PreviewCallback previewCallback;
 
 	public static void init(Context context) {
@@ -130,159 +114,6 @@ public final class CameraManager {
 
 		} else {
 			if (DEBUG) Log.i(TAG, "Camera already opened");
-		}
-	}
-
-	public int getMaxZoom() {
-
-		if (camera == null)
-			return -1;
-
-		Parameters cp = camera.getParameters();
-		if (!cp.isZoomSupported()){
-			return -1;
-		}
-
-		List<Integer> zoomRatios =  cp.getZoomRatios();
-
-		return zoomRatios.get(zoomRatios.size()-1);
-	}
-
-	public void setZoom(int zoom){
-
-		if (camera == null)
-			return;
-
-		final Parameters cp = camera.getParameters();
-
-		int minDist = 100000;
-		int bestIndex = 0;
-
-		if (zoom == -1) {
-			int zoomIndex = cp.getZoom() - 1;
-
-			if (zoomIndex >= 0){
-				zoom = cp.getZoomRatios().get(zoomIndex);
-			}
-		}
-
-		List<Integer> zoomRatios =  cp.getZoomRatios();
-
-		for (int i = 0; i < zoomRatios.size(); i++){
-			int z = zoomRatios.get(i);
-
-			if (Math.abs(z - zoom) < minDist){
-				minDist = Math.abs(z - zoom);
-				bestIndex = i;
-			}
-		}
-
-		final int fBestIndex = bestIndex;
-
-		cp.setZoom(fBestIndex);
-		camera.setParameters(cp);
-	}
-
-	public boolean isTorchAvailable() {
-
-		if (camera == null)
-			return false;
-
-		Parameters cp = camera.getParameters();
-		List<String> flashModes = cp.getSupportedFlashModes();
-		if (flashModes != null && flashModes.contains(Parameters.FLASH_MODE_TORCH))
-			return true;
-		else
-			return false;
-	}
-
-	public void setTorch(final boolean enabled) {
-
-		if (camera == null)
-			return;
-
-		try {
-			final Parameters cp = camera.getParameters();
-
-			List<String> flashModes = cp.getSupportedFlashModes();
-
-			if (flashModes != null && flashModes.contains(Parameters.FLASH_MODE_TORCH)) {
-				//camera.cancelAutoFocus();
-
-				new Handler().postDelayed(new Runnable() {
-
-					@Override
-					public void run() {
-						if (camera != null){
-							if (enabled)
-								cp.setFlashMode(Parameters.FLASH_MODE_TORCH);
-							else
-								cp.setFlashMode(Parameters.FLASH_MODE_OFF);
-							camera.setParameters(cp);
-						}
-
-					}
-				}, 300);
-			}
-		} catch (Exception e) {
-
-		}
-	}
-
-	public float[] getExposureCompensationRange(){
-
-		if (camera == null)
-			return null;
-
-		try{
-
-			Parameters cp = camera.getParameters();
-
-			float ecStep = cp.getExposureCompensationStep();
-			float minEC = cp.getMinExposureCompensation();
-			float maxEC = cp.getMaxExposureCompensation();
-
-			float[] res = new float[3];
-			res[0] = minEC;
-			res[1] = maxEC;
-			res[2] = ecStep;
-
-			return res;
-
-		} catch (Exception e) {
-
-			return null;
-		}
-	}
-
-	public void setExposureCompensation(float value) {
-
-		if (camera == null)
-			return;
-
-		try{
-
-			Parameters cp = camera.getParameters();
-
-			//int currentEC = cp.getExposureCompensation();
-			//float ecStep = cp.getExposureCompensationStep();
-
-			float minEC = cp.getMinExposureCompensation();
-			float maxEC = cp.getMaxExposureCompensation();
-
-			if (value > maxEC)
-				value = maxEC;
-			if (value < minEC)
-				value = minEC;
-
-			cp.setExposureCompensation((int) value);
-
-			camera.setParameters(cp);
-
-			//Log.d("exposure compensation", String.valueOf(value));
-
-		} catch (Exception e) {
-			//Log.d("exposure compensation", "failed to set");
 		}
 	}
 
@@ -380,23 +211,6 @@ public final class CameraManager {
 
 	     return result;
 	 }
-
-	public Bitmap renderCroppedGreyscaleBitmap(byte[] data, int width, int height) {
-		int[] pixels = new int[width * height];
-		byte[] yuv = data;
-		int row = 0;
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
-				int grey = yuv[row + x] & 0xff;
-				pixels[row + x] = 0xFF000000 | (grey * 0x00010101);
-			}
-			row += width;
-		}
-
-		Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-		bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
-		return bitmap;
-	}
 }
 
 final class CameraConfigurationManager {

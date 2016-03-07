@@ -43,17 +43,21 @@ public class CameraPlus extends CordovaPlugin {
 
 
     @Override
-    public boolean execute(String action, JSONArray inputs, CallbackContext callbackContext) throws JSONException {
+    public boolean execute(String action, final JSONArray inputs, final CallbackContext callbackContext) throws JSONException {
         PluginResult result = null;
         if (ACTION_START_CAMERA.equals(action)) {
             result = startCamera(inputs, callbackContext);
-
         } else if (ACTION_STOP_CAMERA.equals(action)) {
             result = stopCamera(inputs, callbackContext);
 
         } else if (ACTION_GET_JPEG_IMAGE.equals(action)) {
-            result = getJpegImage(inputs, callbackContext);
-
+            //run async
+            this.cordova.getActivity().runOnUiThread(new Runnable() {
+                public void run() {
+                    PluginResult result = getJpegImage(inputs, callbackContext);
+                    if(result != null) callbackContext.sendPluginResult( result );
+                }
+            });
         } else if (ACTION_GET_VIDEO_FORMATS.equals(action)) {
             result = getVideoFormats(inputs, callbackContext);
 
@@ -93,10 +97,22 @@ public class CameraPlus extends CordovaPlugin {
         return null;
     }
 
-    private PluginResult getJpegImage(JSONArray inputs, CallbackContext callbackContext) {
+    private PluginResult getJpegImage(JSONArray inputs, CallbackContext callbackContext){
     	Log.w(LOGTAG, "getJpegImage");
 
-        byte[] bArray = CameraManager.lastFrame();
+        byte[] bArray = null;
+
+        //wait a bit for the first image
+        for (int i = 0; i < 10; i++){
+            bArray = CameraManager.lastFrame();
+            if(bArray != null){ break; }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Log.w(LOGTAG, "Waiting for first image...");
+        }
 
         if (bArray != null)
         {
