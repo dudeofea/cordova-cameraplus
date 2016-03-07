@@ -21,7 +21,7 @@ Add the plugin to your cordova project:
 
 ```javascript
 
-startCamera( options, success_callback, error_callback );
+startCamera( camera_id, options, success_callback, error_callback );
 
 stopCamera( success_callback, error_callback );
 
